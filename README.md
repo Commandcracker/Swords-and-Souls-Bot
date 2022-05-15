@@ -1,6 +1,6 @@
 # Swords and Souls Bot
 
-A Bot that van Play Swords and Souls like a God!
+A Bot that can Play Swords and Souls like a God!
 
 ## How to play Swords and Souls
 
