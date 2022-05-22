@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # local modules
-from WindowCapture import WindowCapture
+import WindowCapture as WC
 """
 TODO:   maybe switch to other libraries?
 
@@ -28,7 +28,6 @@ import time
 
 # pip modules
 import numpy as np
-from Xlib.error import BadMatch as XBadMatch, BadWindow as XBadWindow
 import cv2
 
 
@@ -68,7 +67,7 @@ def closest(list: np.ndarray, value: int) -> int:
     return (np.abs(list - value)).argmin()
 
 
-def find_rgb(img: np.ndarray, r: int, g: int, b: int) -> np.ndarray:
+def find_rgb(img: np.ndarray, r: int, g: int, b: int, a: int) -> np.ndarray:
     """
     Finds all pixels with the given RGB values in the given image.
     returns a numpy array of the indices of the pixels.
@@ -76,7 +75,7 @@ def find_rgb(img: np.ndarray, r: int, g: int, b: int) -> np.ndarray:
     """
 
     # ([y1 y2 ... yn], [x1 y2 ... xn])
-    indices = np.where(np.all(img == (b, g, r), axis=-1))
+    indices = np.where(np.all(img == (b, g, r, a), axis=-1))
 
     # [[y1 x1],[y2 x2], ... [yn xn]]
     indices = np.moveaxis(indices, 1, 0)
@@ -115,47 +114,84 @@ def get_channels(img: np.ndarray) -> np.ndarray:
     return img.shape[2]
 
 
+def block(window: WC.Window) -> None:
+    img = window.get_image()
+
+    appels = find_rgb(img, r=153, g=39, b=41, a=255)
+    stars = find_rgb(img, r=242, g=193, b=0, a=255)
+
+    width = img.shape[1]
+    height = img.shape[0]
+
+    center = get_center(img)
+
+    if appels.size > 0:
+        closest_appel = find_closest_point_to_point(
+            appels, center
+        )
+
+        if stars.size > 0:
+            closest_star = find_closest_point_to_point(
+                stars, center
+            )
+            closest = find_closest_point_to_point(
+                np.array([
+                    appels[closest_appel],
+                    stars[closest_star]
+                ]), center
+            )
+
+            if closest == 0:
+                # apple is closest
+                closest_x, closest_y = appels[closest_appel]
+
+                if window.is_active:
+                    window.warp_pointer(int(closest_x), int(closest_y))
+            else:
+                # star is closest
+                closest_x, closest_y = stars[closest_star]
+
+                if window.is_active:
+                    window.warp_pointer(
+                        int(width-closest_x), int(height-closest_y))
+
+        else:
+            closest_x, closest_y = appels[closest_appel]
+
+            if window.is_active:
+                window.warp_pointer(int(closest_x), int(closest_y))
+    elif stars.size > 0:
+        closest_star = find_closest_point_to_point(
+            stars, center
+        )
+
+        closest_x, closest_y = stars[closest_star]
+
+        if window.is_active:
+            window.warp_pointer(
+                int(width-closest_x), int(height-closest_y))
+
+
 def main() -> None:
-    """
-    Main function.
-    """
     print("Waiting 2 seconds, Please open the window you want to capture.")
     time.sleep(2)
 
-    window_capture = WindowCapture()
+    window = WC.get_active_window()
 
     print("Recording Window: {} (PID: {})".format(
-        window_capture.get_window_name(),
-        window_capture.get_window_pid()
+        window.get_name(),
+        window.get_pid()
     ))
 
     while True:
         try:
             loop_time = time.time()
-            img = window_capture.get_image()
-            appels = find_rgb(img, r=153, g=39, b=41)
-
-            if appels.size > 0:
-
-                # get center of screen
-                center = get_center(img)
-                index_of_closest_point_to_center = find_closest_point_to_point(
-                    appels, center
-                )
-
-                closest_x, closest_y = appels[index_of_closest_point_to_center]
-
-                if window_capture.is_active():
-                    window_capture.warp_pointer(closest_x, closest_y)
-
+            block(window)
             print("FPS {}".format(1 / (time.time() - loop_time)), end="\r")
             loop_time = time.time()
-
-        except XBadWindow:
-            print("Window vanished")
-
-        except XBadMatch:
-            print("Xlib.error.BadMatch Window scaled at time of screenshot")
+        except Exception as e:
+            print("Failed to get image.")
+            print(e)
 
 
 if __name__ == "__main__":
