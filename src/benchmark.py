@@ -26,7 +26,7 @@ def benchmark(function, times: int = 100, show: bool = False) -> np.ndarray:
 
 
 def benchmark_WindowCapture(**args) -> np.ndarray:
-    import WindowCapture
+    import WindowCapture as WindowCapture
     window = WindowCapture.Window(_xid)
     def func(): return window.get_image(_geo)
     return benchmark(function=func, **args)
@@ -76,7 +76,7 @@ def main():
 
 
 if __name__ == "__main__":
-    import WindowCapture
+    import WindowCapture as WindowCapture
     _window = WindowCapture.get_active_window()
     _xid = _window.XID
     _geo = _window.get_geometry()

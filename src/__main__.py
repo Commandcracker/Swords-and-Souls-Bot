@@ -4,6 +4,7 @@
 # local modules
 import WindowCapture as WC
 """
+TODO: create helper class
 TODO:   maybe switch to other libraries?
 
         for WindowCaptureing: 
@@ -17,7 +18,7 @@ TODO:   maybe switch to other libraries?
             [PyAutoGUI](https://pypi.org/project/PyAutoGUI/) or
             [directKeys](https://github.com/Code-Bullet/Storm-The-House-Auto-Clicker/blob/master/directKeys.py) {[win32gui](https://pypi.org/project/win32gui/) and [win32gui](https://pypi.org/project/win-api/)}
 
-TODO:   make WindowCapture a seperat Package
+TODO:   make WindowCapture a separate Package
 TODO:   record mouse and keyboard movements to make helping hotkeys
 TODO:   make a bot for all other Game modes
 """
@@ -112,6 +113,39 @@ def get_channels(img: np.ndarray) -> np.ndarray:
     Returns the channels of the given image.
     """
     return img.shape[2]
+
+
+def critical(window: WC.Window) -> None:
+    geo = window.get_geometry()
+    geo = (
+        int(geo[0]+geo[2]/4),
+        int(geo[1]+geo[3]/4),
+        int(geo[2]-geo[2]/2),
+        int(geo[3]-geo[3]/2)
+    )
+
+    img = window.get_image(geo)
+
+    red_pixels = np.logical_and(
+        img[:, :, 2] == 204,
+        img[:, :, 1] == 0,
+        img[:, :, 0] == 0
+    )
+
+    if np.any(red_pixels):
+        y, x = np.unravel_index(np.argmax(red_pixels), red_pixels.shape)
+
+        time.sleep(0.2)  # Human reaction time
+
+        print("1st *Click*"+" "*15, end="\r")
+        window.send_mouse_click(int(x), int(y))
+
+        time.sleep(0.7)  # Time between 1st and 2nd click
+
+        print("2nd *Click*"+" "*15, end="\r")
+        window.send_mouse_click(int(x), int(y))
+
+        time.sleep(0.2)  # Human reaction time
 
 
 def block(window: WC.Window) -> None:

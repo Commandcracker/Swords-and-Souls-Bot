@@ -402,6 +402,9 @@ class Window(object):
             ctypes.byref(key)  # XEvent *event_send
         )
 
+        # flush display or events will run delayed cus thai'r only called on the next update
+        xlib.XFlush(display)
+
     def send_str(self, str: str) -> None:
         """Send a string to the window
 
@@ -449,6 +452,9 @@ class Window(object):
             ctypes.byref(event)
         )
 
+        # flush display or events will run delayed cus thai'r only called on the next update
+        xlib.XFlush(display)
+
         event.type = EventTypes.ButtonRelease
 
         xlib.XSendEvent(
@@ -458,6 +464,9 @@ class Window(object):
             Masks.ButtonReleaseMask,
             ctypes.byref(event)
         )
+
+        # flush display or events will run delayed cus thai'r only called on the next update
+        xlib.XFlush(display)
 
 
 def get_active_window_xid() -> int:
