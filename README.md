@@ -18,5 +18,5 @@ pip install -Ur requirements.txt
 ## Run the bot
 
 ```sh
-python .
+python src
 ```
