@@ -7,9 +7,13 @@ import argparse
 
 # pip modules
 from display_server_interactions import DSI
-from training_block import block
-from training_critical import critical
 
+# local modules
+from training_block import Block
+from training_critical import Critical
+from training_dodge import Dodge
+
+# rich printing
 try:
     from rich.console import Console
     from rich.traceback import install
@@ -35,7 +39,7 @@ def parse_args():
         "mode",
         type=str,
         default="block",
-        choices=["block", "critical"],
+        choices=["block", "critical", "dodge"],
         help="The mode to train in."
     )
 
@@ -63,15 +67,17 @@ def main() -> None:
         window.pid
     ))
 
+    if args.mode == "block":
+        runnable = Block(window)
+    elif args.mode == "critical":
+        runnable = Critical(window)
+    elif args.mode == "dodge":
+        runnable = Dodge(window)
+
     while True:
         try:
             loop_time = time()
-
-            if args.mode == "block":
-                block(window)
-            elif args.mode == "critical":
-                critical(window)
-
+            runnable.run()
             print("FPS {}".format(1 / (time() - loop_time)), end="\r")
             loop_time = time()
         except Exception as e:
