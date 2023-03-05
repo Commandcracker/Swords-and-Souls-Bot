@@ -9,12 +9,13 @@ import numpy as np
 
 # local modules
 from runnable import Runnable
+from display_server_interactions.box import Box
 
 
 class Critical(Runnable):
     def run(self):
         geo = self.window.geometry
-        geo = (
+        geo = Box(
             int(geo[0]+geo[2]/4),
             int(geo[1]+geo[3]/4),
             int(geo[2]-geo[2]/2),
@@ -22,6 +23,7 @@ class Critical(Runnable):
         )
 
         img = np.array(self.window.get_image(geo))
+        sleep(0.1)  # Idk why but it fixes "float division by zero"
 
         red_pixels = np.logical_and(
             img[:, :, 2] == 204,

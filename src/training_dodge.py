@@ -6,6 +6,7 @@ from pathlib import Path
 
 # pip modules
 import numpy as np
+from display_server_interactions.box import Box
 from display_server_interactions.window import WindowBase
 import cv2
 
@@ -36,7 +37,7 @@ class Dodge(Runnable):
 
     def run(self):
         geo = self.window.geometry
-        geo = (
+        geo = Box(
             int(geo[0]),
             int(geo[1]+geo[3]/4),
             int(geo[2]),
@@ -90,7 +91,7 @@ class Dodge(Runnable):
 
         elif maxVal_up >= 0.6:
             print("**match Up**", end='\r')
-            self.window.send_chr("Up")
+            self.window.send_chr(0x0004)
 
         elif maxVal_left >= 0.6:
             print("**match Left**", end='\r')
