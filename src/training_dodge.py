@@ -91,7 +91,7 @@ class Dodge(Runnable):
 
         elif maxVal_up >= 0.6:
             print("**match Up**", end='\r')
-            self.window.send_chr(0x0004)
+            self.window.send_chr("Up")
 
         elif maxVal_left >= 0.6:
             print("**match Left**", end='\r')
